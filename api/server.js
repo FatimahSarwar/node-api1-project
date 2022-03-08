@@ -16,7 +16,7 @@ server.get('/api/users/:id', (req, res) => {
         if(user == null){
             res.status(404).json({message: `does not exist`})
         }else{
-            res.json(user)
+            res.status(200).json(user)
         }
     })
     .catch(() => {
@@ -42,23 +42,31 @@ User.insert(body)
 })
 
 //PUT
-server.put(` /api/users/:id `, (req , res) =>{
-const user = req.body;
-if(!req.body.name || !req.body.bio) {
-    res.status(400).json({ message:  "Please provide name and bio for the user" });
-    return;
-}
-User.update(req.params.id, user)
-.then(users =>{
-    if(users == null){
-        res.status(404).json({message:"The user with the specified ID does not exist"})
+server.put('/api/users/:id', (req, res) => {
+    const user = req.body;
+
+    if(!req.body.name) {
+        res.status(400).json({ message: "Please provide name and bio for the user" });
         return;
-    }else{res.status(200).json(user)}
-})
-.catch(err =>{
-    res.status(500).json({message:"The user information could not be modified"})
-})
-})
+    } else if(!req.body.bio) {
+        res.status(400).json({ message: "Please provide name and bio for the user" });
+        return;
+    }
+
+    User.update(req.params.id, user)
+        .then(user => {
+            if(user == null) {
+                res.status(404).json({ message: `The user with the specified ID does not exist`});
+            } else {
+                res.status(200).json(user);
+            }
+        })
+        .catch(err => {
+            res.status(500).json({ message:"The user information could not be modified" });
+        });
+});
+
+//Delete
 server.delete('/api/users/:id', (req, res) => {
     
     User.remove(req.params.id)
